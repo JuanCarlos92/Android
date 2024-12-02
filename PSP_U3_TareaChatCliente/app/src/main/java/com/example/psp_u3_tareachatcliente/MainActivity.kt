@@ -14,7 +14,6 @@ import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity() {
 
-    // Declaración de las variables a nivel de clase
     private lateinit var socket: Socket // variable de tipo Socket para la conexión con el servidor
     private lateinit var escribir: PrintWriter // variable para enviar mensajes al servidor
     private lateinit var leer: BufferedReader // variable para leer mensajes del servidor
