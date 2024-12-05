@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
-        // Asocia las vistas con los elementos definidos en el layout XML
+        // Asocia las vistas con los elementos definidos en el XML
         mensajeEntrada = findViewById(R.id.mensajeEntrada)
         botonEnviar = findViewById(R.id.botonEnviar)
         vistaChat = findViewById(R.id.vistaChat)
@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
 
         // Conéctate al servidor en un hilo separado para no bloquear la UI principal
         thread {
-            connectToServer() // Método conectar con el servidor
+            connectToServer() // Metodo conectar con el servidor
         }
 
         // Boton enviar
@@ -49,22 +49,26 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Método para conectarse al servidor
+    //--------------------------------------------------------------------------------------------
+
+    // Metodo para conectarse al servidor
     private fun connectToServer() {
         try {
             // Establece la conexión con el servidor
             socket = Socket(host, puerto)
-            escribir = PrintWriter(socket.getOutputStream(), true) // Para enviar mensajes al servidor
-            leer = BufferedReader(InputStreamReader(socket.getInputStream())) // Para leer mensajes del servidor
+            escribir =
+                PrintWriter(socket.getOutputStream(), true) // Para enviar mensajes al servidor
+            leer =
+                BufferedReader(InputStreamReader(socket.getInputStream())) // Para leer mensajes del servidor
 
             // Lee los mensajes del servidor en un hilo separado para no bloquear la UI
             thread {
                 while (true) {
                     val message = leer.readLine() // Lee un mensaje enviado por el servidor
-                    runOnUiThread {
 
-                        // Actualiza la interfaz de usuario (UI) con el nuevo mensaje recibido
-                        vistaChat.append("\n$message")
+                    // Muestra el mensaje recibido en la UI
+                    runOnUiThread {
+                        vistaChat.append("\nRecibido: $message")
                     }
                 }
             }
@@ -76,13 +80,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Método para enviar un mensaje al servidor
+    // Metodo para enviar un mensaje al servidor
     private fun sendMessage(message: String) {
         thread {
             try {
-                // Envía el mensaje al servidor usando PrintWriter
-                escribir.println(message)
+                escribir.println(message) // Envía el mensaje al servidor
 
+                // Muestra el mensaje enviado en la UI
+                runOnUiThread {
+                    vistaChat.append("\nEnviado: $message")
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
                 runOnUiThread {
@@ -92,7 +99,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Método que se ejecuta cuando se cierra la aplicación
+    // Metodo que se ejecuta cuando se cierra la aplicación
     override fun onDestroy() {
         super.onDestroy()
 
