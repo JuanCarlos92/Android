@@ -1,8 +1,10 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.ChatCliente" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+
+        <item name="colorPrimary">#FFA500</item> <!-- Naranja -->
+        <item name="colorPrimaryDark">#FF8C00</item> <!-- Naranja oscuro -->
+        <item name="colorAccent">#FFD700</item> <!-- Amarillo dorado -->
     </style>
 
     <style name="Theme.ChatCliente" parent="Base.Theme.ChatCliente" />

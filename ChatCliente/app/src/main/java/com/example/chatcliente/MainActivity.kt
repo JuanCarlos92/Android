@@ -1,20 +1,108 @@
 package com.example.chatcliente
 
 import android.os.Bundle
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.io.PrintWriter
+import java.net.Socket
+import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var socket: Socket // variable de tipo Socket [conexión con el servidor]
+    private lateinit var escribir: PrintWriter // variable para enviar msj
+    private lateinit var leer: BufferedReader // variable para leer msj
+    private lateinit var mensajeEntrada: EditText // TextField
+    private lateinit var botonEnviar: Button // Botón
+    private lateinit var vistaChat: TextView // TextArea
+    private val host = "10.0.2.2" // Al estar emulado la IP 10.0.2.2 corresponde a 127.0.0.1
+    private val puerto = 12345
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+
+        // Asocia los elementos del XML
+        mensajeEntrada = findViewById(R.id.mensajeEntrada)
+        botonEnviar = findViewById(R.id.botonEnviar)
+        vistaChat = findViewById(R.id.vistaChat)
+
+
+        // Conéctate al servidor en un hilo separado (para no bloquear la UI)
+        thread {
+            connectToServer() // <-- Metodo conectar con el Server
         }
+
+        // --> [BOTON ENVIAR] <--
+        botonEnviar.setOnClickListener {
+            val message = mensajeEntrada.text.toString() // Obtiene el mensaje
+            if (message.isNotEmpty()) {
+                sendMessage(message) // Llama a la función para enviar el mensaje al servidor
+                mensajeEntrada.text.clear()
+            }
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------
+
+    // Metodo conectarse al Server
+    private fun connectToServer() {
+        try {
+            // Establece la conexión
+            socket = Socket(host, puerto)
+            escribir =
+                PrintWriter(socket.getOutputStream(), true) // Para enviar mensajes
+            leer =
+                BufferedReader(InputStreamReader(socket.getInputStream())) // Para leer mensajes
+
+            // Lee los mensajes del servidor en un hilo separado (para no bloquear la UI)
+            thread {
+                while (true) {
+                    val message = leer.readLine() // Lee un mensaje enviado por el servidor
+
+                    // Muestra el mensaje recibido en el TextArea
+                    runOnUiThread {
+                        vistaChat.append("\nRecibido: $message")
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            runOnUiThread {
+                vistaChat.append("\nError al conectar al servidor")
+            }
+        }
+    }
+
+    // Metodo enviar un mensaje al servidor
+    private fun sendMessage(message: String) {
+        thread {
+            try {
+                escribir.println(message) // Envía el mensaje al servidor
+
+                // Muestra el mensaje enviado en el TextArea
+                runOnUiThread {
+                    vistaChat.append("\nEnviado: $message")
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                runOnUiThread {
+                    vistaChat.append("\nError al enviar mensaje")
+                }
+            }
+        }
+    }
+
+    // Metodo que se ejecuta cuando se cierra la aplicación
+    override fun onDestroy() {
+        super.onDestroy()
+
+        socket.close() // Cierra la conexión con el servidor
     }
 }
