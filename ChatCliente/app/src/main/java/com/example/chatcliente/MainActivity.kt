@@ -21,12 +21,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var botonEnviar: Button // Botón
     private lateinit var vistaChat: TextView // TextArea
     private val host = "10.0.2.2" // Al estar emulado la IP 10.0.2.2 corresponde a 127.0.0.1
-    private val puerto = 12345
+    private var puerto = 12345
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+
+        // Obtén el puerto del intent
+        puerto = intent.getIntExtra("puerto", 12345)
 
         // Asocia los elementos del XML
         mensajeEntrada = findViewById(R.id.mensajeEntrada)
