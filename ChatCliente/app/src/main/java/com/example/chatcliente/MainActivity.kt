@@ -15,13 +15,15 @@ import kotlin.concurrent.thread
 class MainActivity : AppCompatActivity() {
 
     private lateinit var socket: Socket // variable de tipo Socket [conexión con el servidor]
-    private lateinit var escribir: PrintWriter // variable para enviar msj
-    private lateinit var leer: BufferedReader // variable para leer msj
-    private lateinit var mensajeEntrada: EditText // TextField
-    private lateinit var botonEnviar: Button // Botón
-    private lateinit var vistaChat: TextView // TextArea
+    private lateinit var writer: PrintWriter // variable para enviar msj
+    private lateinit var read: BufferedReader // variable para leer msj
+    private lateinit var mensajeEntrada: EditText
+    private lateinit var botonEnviar: Button
+    private lateinit var vistaChat: TextView
+    private var nombreCliente: String = ""
     private val host = "10.0.2.2" // Al estar emulado la IP 10.0.2.2 corresponde a 127.0.0.1
     private var puerto = 12345
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,12 +32,13 @@ class MainActivity : AppCompatActivity() {
 
         // Obtén el puerto del intent
         puerto = intent.getIntExtra("puerto", 12345)
+        val ip = intent.getStringExtra("ip") ?: host  // Obtener la IP, por defecto usar 10.0.2.2
+        nombreCliente = intent.getStringExtra("nombre") ?: "ClienteSinNombre"  // Obtener el nombre del cliente
 
         // Asocia los elementos del XML
         mensajeEntrada = findViewById(R.id.mensajeEntrada)
         botonEnviar = findViewById(R.id.botonEnviar)
         vistaChat = findViewById(R.id.vistaChat)
-
 
         // Conéctate al servidor en un hilo separado (para no bloquear la UI)
         thread {
@@ -59,15 +62,18 @@ class MainActivity : AppCompatActivity() {
         try {
             // Establece la conexión
             socket = Socket(host, puerto)
-            escribir =
+            writer =
                 PrintWriter(socket.getOutputStream(), true) // Para enviar mensajes
-            leer =
+            read =
                 BufferedReader(InputStreamReader(socket.getInputStream())) // Para leer mensajes
+
+            // Envía el nombre del cliente inmediatamente después de conectarse
+            writer.println(nombreCliente)
 
             // Lee los mensajes del servidor en un hilo separado (para no bloquear la UI)
             thread {
                 while (true) {
-                    val message = leer.readLine() // Lee un mensaje enviado por el servidor
+                    val message = read.readLine() // Lee un mensaje enviado por el servidor
 
                     // Muestra el mensaje recibido en el TextArea
                     runOnUiThread {
@@ -87,7 +93,7 @@ class MainActivity : AppCompatActivity() {
     private fun sendMessage(message: String) {
         thread {
             try {
-                escribir.println(message) // Envía el mensaje al servidor
+                writer.println(message) // Envía el mensaje al servidor
 
                 // Muestra el mensaje enviado en el TextArea
                 runOnUiThread {
