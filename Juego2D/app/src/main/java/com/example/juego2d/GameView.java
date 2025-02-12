@@ -139,10 +139,10 @@ public class GameView extends SurfaceView implements Runnable {
             // Si el pájaro sale completamente de la pantalla por la izquierda
             if (pajaro.x + pajaro.width < 0) {
                 // Si el pájaro no fue derribado, el juego termina
-                if (!pajaro.wasShot) {
-                    isGameOver = true;
-                    return;
-                }
+//                if (!pajaro.wasShot) {
+//                    isGameOver = true;
+//                    return;
+//                }
                 // Configura una nueva velocidad aleatoria para el pájaro
                 int bound = (int) (30 * screenRatioX);
                 pajaro.speed = random.nextInt(bound);
