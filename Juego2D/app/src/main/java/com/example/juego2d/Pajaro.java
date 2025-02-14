@@ -27,8 +27,8 @@ public class Pajaro {
         height = pajaro1.getHeight();
 
         // Reduce el tamaño de la imagen
-        width /= 15;
-        height /= 15;
+        width /= 10;
+        height /= 10;
 
         // Ajusta segun la pantalla
         width = (int) (width * screenRatioX);

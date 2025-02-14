@@ -138,11 +138,7 @@ public class GameView extends SurfaceView implements Runnable {
 
             // Si el pájaro sale completamente de la pantalla por la izquierda
             if (pajaro.x + pajaro.width < 0) {
-                // Si el pájaro no fue derribado, el juego termina
-//                if (!pajaro.wasShot) {
-//                    isGameOver = true;
-//                    return;
-//                }
+
                 // Configura una nueva velocidad aleatoria para el pájaro
                 int bound = (int) (30 * screenRatioX);
                 pajaro.speed = random.nextInt(bound);
@@ -175,8 +171,10 @@ public class GameView extends SurfaceView implements Runnable {
             canvas.drawBitmap(background2.background, background2.x, background2.y, paint);
 
             // Dibuja todos los pájaros en la pantalla
-            for (Pajaro pajaro : pajaros)
-                canvas.drawBitmap(pajaro.getPajaro(), pajaro.x, pajaro.y, paint);
+            for (Pajaro pajaro : pajaros) {
+                int posicionY = Math.max(pajaro.y, screenY / 4);
+                canvas.drawBitmap(pajaro.getPajaro(), pajaro.x, posicionY, paint);
+            }
             // Dibuja el puntaje en el centro superior de la pantalla
             canvas.drawText(score + "", screenX / 2f, 164, paint);
 
@@ -242,22 +240,30 @@ public class GameView extends SurfaceView implements Runnable {
     // Metodo que detecta la interacción del usuario con la pantalla táctil
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        switch (event.getAction()) {
+        int action = event.getActionMasked(); // Obtener el tipo de evento
+        int pointerIndex = event.getActionIndex(); // Índice del puntero (dedo)
+
+        switch (action) {
             case MotionEvent.ACTION_DOWN:
-                // Parte izquierda de la pantalla: el personaje sube
-                if (event.getX() < screenX / 2) {
-                    avion.isGoingUp = true;
+            case MotionEvent.ACTION_POINTER_DOWN: // Detecta múltiples toques
+                if (event.getX(pointerIndex) < screenX / 2) {
+                    avion.isGoingUp = true; // Mover hacia arriba
+                } else {
+                    avion.toShoot++; // Disparar
                 }
                 break;
+
             case MotionEvent.ACTION_UP:
-                // Suelta la pantalla: el personaje deja de subir
-                avion.isGoingUp = false;
-                // Parte derecha de la pantalla: DISPARA
-                if (event.getX() > screenX / 2) avion.toShoot++;
+            case MotionEvent.ACTION_POINTER_UP: // Se suelta un dedo
+                if (event.getX(pointerIndex) < screenX / 2) {
+                    avion.isGoingUp = false; // Detener movimiento
+                }
                 break;
         }
-        return true;
+
+        return true; // Devuelve true para continuar detectando eventos táctiles
     }
+
 
     // Metodo para generar un nuevo disparo desde la posición del personaje
     public void nuevaBala() {
